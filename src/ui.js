@@ -51,9 +51,9 @@ function UI(cb) {
         document.onkeydown = function (e) { self.onKeyDown(e); };
     }
     // load tiles and trigger callback
-    this.tiles = new Image();
-    this.tiles.onload = cb;
-    this.tiles.src = 'tiles.png';
+    this.otiles = new Image();
+    this.otiles.onload = cb;
+    this.otiles.src = 'tiles.png';
 }
 UI.prototype = {
     /**
@@ -61,6 +61,11 @@ UI.prototype = {
      * @type {?{x: number, y: number}}
      */
     down: null,
+    /**
+     * Scale factor.
+     * @type {number}
+     */
+    scale: 0,
     /**
      * Current width of the canvas.
      * @type {number}
@@ -87,6 +92,32 @@ UI.prototype = {
      */
     upgradeAnim: null,
 
+    /**
+     * Scale sprites to avoid blurring and non-square pixels.
+     *
+     * @return {number} Scale factor.
+     */
+    scaleSprites: function (scale) {
+            var x, y, i, data,
+                canvas = document.createElement('canvas'),
+                ctx = canvas.getContext('2d');
+            scale = Math.ceil(scale);
+            canvas.width = this.canvas.height = 128;
+            ctx.drawImage(this.otiles, 0, 0);
+            data = ctx.getImageData(0, 0, 128, 128).data;
+            canvas.width = canvas.height = 128 * scale;
+            for (x = 0; x < 128; x += 1) {
+                for (y = 0; y < 128; y += 1) {
+                    i = (y * 128 + x) * 4;
+                    if (data[i + 3]) {
+                        ctx.fillStyle = 'rgb(' + [data[i], data[i + 1], data[i + 2]] + ')';
+                        ctx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+            this.tiles = new Image();
+            this.tiles.src = canvas.toDataURL();
+    },
     /**
      * Determines the scale factor best for the current resolution and settings.
      *
@@ -122,8 +153,6 @@ UI.prototype = {
         canvas.style.left = this.offsetX + 'px';
         canvas.style.top = this.offsetY + 'px';
         ctx.scale(scale, scale);
-        ctx.imageSmoothingEnabled = ctx.webkitImageSmoothingEnabled =
-            ctx.msImageSmoothingEnabled = ctx.mozImageSmoothingEnabled = false;
     },
 
     /**
@@ -425,7 +454,12 @@ UI.prototype = {
      */
     update: function () {
         var scale = this.getScale(), i, div, full,
-            redraw = g.redraw || window.innerWidth !== this.width || window.innerHeight !== this.height;
+            redraw = g.redraw;
+        if (this.scale !== scale) {
+            redraw = true;
+            this.scale = scale;
+            this.scaleSprites(scale);
+        }
         if (redraw) {
             // set current size and offsets
             this.width = window.innerWidth;
@@ -551,7 +585,8 @@ UI.prototype = {
      * @param {number} y y coordinate in pixels.
      */
     drawSprite: function(ctx, sx, sy, x, y) {
-        ctx.drawImage(this.tiles, sx * 16, sy * 16, 16, 16, x, y, 16, 16);
+        var scale = Math.ceil(this.scale);
+        ctx.drawImage(this.tiles, sx * 16 * scale, sy * 16 * scale, 16 * scale, 16 * scale, x, y, 16, 16);
     },
 
     /**
@@ -641,7 +676,7 @@ UI.prototype = {
      */
     onMouseDown: function (e) {
         // convert coordinates
-        var ratio = this.getScale() * 16,
+        var ratio = this.scale * 16,
             x = Math.floor((e.pageX - this.offsetX) / ratio),
             y = Math.floor((e.pageY - this.offsetY) / ratio);
         // activate forwarding
@@ -657,7 +692,7 @@ UI.prototype = {
      */
     onMouseUp: function (e) {
         // convert coordinates
-        var ratio = this.getScale() * 16,
+        var ratio = this.scale * 16,
             x = Math.floor((e.pageX - this.offsetX) / ratio),
             y = Math.floor((e.pageY - this.offsetY) / ratio);
         // abort if we don't know if this is a tap / click or drag action
