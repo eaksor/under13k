@@ -200,7 +200,7 @@ UI.prototype = {
         this.drawGradient(ctx, 16, 112, 112, 16);
 
         // draw player
-        ctx.drawImage(this.tiles, 0, 32, 16, 16, 65, 184, 16, 16);
+        this.drawSprite(ctx, 0, 2, 65, 184);
     },
 
     /**
@@ -363,8 +363,8 @@ UI.prototype = {
                 }
                 if (disabled) {
                     ctx.globalAlpha = 0.5;
-                    ctx.drawImage(this.tiles, 48, 0, 16, 15, i * 32, height + 1, 16, 15);
-                    ctx.drawImage(this.tiles, 48, 0, 16, 15, i * 32, height + 16, 16, 15);
+                    this.drawSprite(ctx, 3, 0, i * 32, height);
+                    this.drawSprite(ctx, 3, 0, i * 32, height + 16);
                     ctx.globalAlpha = 1;
                 }
             }
@@ -387,8 +387,8 @@ UI.prototype = {
                 ctx.fillText(price, i * 16 + 24, height + 24);
                 if (price > g.money) {
                     ctx.globalAlpha = 0.5;
-                    ctx.drawImage(this.tiles, 48, 0, 16, 15, (i + 1) * 16, height + 1, 16, 15);
-                    ctx.drawImage(this.tiles, 48, 0, 16, 15, (i + 1) * 16, height + 16, 16, 15);
+                    this.drawSprite(ctx, 3, 0, (i + 1) * 16, height);
+                    this.drawSprite(ctx, 3, 0, (i + 1) * 16, height + 16);
                     ctx.globalAlpha = 1;
                 }
             }
