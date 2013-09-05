@@ -343,7 +343,7 @@ Game.prototype = {
                     this.redraw = true;
                 }
                 // ... or show potion buying screen
-                else if (this.player.life < this.player.maxLife && this.potionCost <= this.money && Math.random() < 0.6) {
+                else if (this.player.life < this.player.maxLife && this.potionCost + this.towerPrices[0] <= this.money && Math.random() < 0.6) {
                     this.nextStart = {x: tx, y: ty};
                     this.state = state.POTION;
                     this.redraw = true;
