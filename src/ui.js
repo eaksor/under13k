@@ -363,13 +363,6 @@ UI.prototype = {
                     this.drawSprite(this.ctx[0], 3, 0, x * 16, height + y * 16);
                 }
             }
-            // outline
-            this.ctx[0].fillStyle = 'rgba(255,255,255,0.2)';
-            this.ctx[0].fillRect(0, height, width, 1);
-            this.ctx[0].fillRect(0, height, 1, 32);
-            this.ctx[0].fillStyle = 'rgba(0,0,0,0.2)';
-            this.ctx[0].fillRect(0, height + 31, width, 1);
-            this.ctx[0].fillRect(width - 1, height, 1, 32);
             
             // EVP listener
             this.drawSprite(this.ctx[0], 4, 7, 0, height);
@@ -438,6 +431,14 @@ UI.prototype = {
                 }
             }
         }
+        
+        // outline
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillRect(0, height, width, 1);
+        ctx.fillRect(0, height, 1, 32);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(0, height + 31, width, 1);
+        ctx.fillRect(width - 1, height, 1, 32);
         
         ctx.fillStyle = '#222';
         ctx.textAlign = 'right';
