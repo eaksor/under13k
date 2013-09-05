@@ -11,11 +11,13 @@ if [ -f $name.zip ]; then
     rm $name.zip
 fi
 echo "copying"
-cp src/tiles.png src/journal.html $name/
+cp src/tiles.png src/ghost.png $name/
 cp src/index.c.html $name/index.html
 cp src/journal.c.html $name/journal.html
+cp src/under.c.manifest $name/under.manifest
 echo "compiling"
 #java -jar compiler.jar --warning_level VERBOSE --compilation_level ADVANCED_OPTIMIZATIONS --externs src/extern.js --js ${files} --js_output_file $name/utc.js
 java -jar compiler.jar --jscomp_warning checkTypes --compilation_level ADVANCED_OPTIMIZATIONS --use_types_for_optimization --externs src/extern.js --js ${files} --js_output_file $name/utc.js
 echo "zipping"
 zip $name.zip -r $name/
+ls -l $name.zip
