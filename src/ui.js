@@ -319,24 +319,41 @@ UI.prototype = {
      * Draws the in-game menu at the bottom.
      *
      * @param {CanvasRenderingContext2D} ctx Context used.
+     * @param {boolean} redraw Whether to redraw everything or just dynamic part.
      */
-    drawMenu: function (ctx) {
+    drawMenu: function (ctx, redraw) {
         var price, i, o, disabled, x, y,
             width = g.columns * 16,
             height = g.rows * 16;
-        // background
-        for (x = 0; x < g.columns; x += 1) {
-            for (y = 0; y < 2; y += 1) {
-                this.drawSprite(ctx, 3, 0, x * 16, height + y * 16);
+
+        // static parts
+        if (redraw) {
+            // background
+            for (x = 0; x < g.columns; x += 1) {
+                for (y = 0; y < 2; y += 1) {
+                    this.drawSprite(this.ctx[0], 3, 0, x * 16, height + y * 16);
+                }
+            }
+            // outline
+            this.ctx[0].fillStyle = 'rgba(255,255,255,0.2)';
+            this.ctx[0].fillRect(0, height, width, 1);
+            this.ctx[0].fillRect(0, height, 1, 32);
+            this.ctx[0].fillStyle = 'rgba(0,0,0,0.2)';
+            this.ctx[0].fillRect(0, height + 31, width, 1);
+            this.ctx[0].fillRect(width - 1, height, 1, 32);
+            
+            // EVP listener
+            this.drawSprite(this.ctx[0], 4, 7, 0, height);
+            // money
+            this.drawSprite(this.ctx[0], 6, 1, width - 42, height);
+            // spawners
+            this.drawSprite(this.ctx[0], 0, 0, width - 17, height);
+            // ffwd and pause button
+            if (g.state === state.ACTIVE) {
+                this.drawSprite(this.ctx[0], 6, 6, width - 32, height + 16);
+                this.drawSprite(this.ctx[0], 5, 6, width - 16, height + 16);
             }
         }
-        // outline
-        ctx.fillStyle = 'rgba(255,255,255,0.2)';
-        ctx.fillRect(0, height, width, 1);
-        ctx.fillRect(0, height, 1, 32);
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fillRect(0, height + 31, width, 1);
-        ctx.fillRect(width - 1, height, 1, 32);
 
         // selected tower buttons
         ctx.font = '8px Arial';
@@ -373,7 +390,6 @@ UI.prototype = {
         else {
             // EVP listener
             o = g.spawnersNear(Math.floor(g.player.pos.x / 16), Math.floor(g.player.pos.y / 16));
-            this.drawSprite(ctx, 4, 7, 0, height);
             this.drawSprite(ctx, 5 + o, 7, 0, height);
 
             // tower buttons
@@ -393,24 +409,15 @@ UI.prototype = {
                 }
             }
         }
-
+        
         ctx.fillStyle = '#222';
         ctx.textAlign = 'right';
         // money
         ctx.fillText(g.money, width - 43, height + 12);
-        this.drawSprite(ctx, 6, 1, width - 42, height);
         // spawners
         ctx.fillText(String(g.numSpawners - g.wave - 1), width - 18, height + 12);
-        this.drawSprite(ctx, 0, 0, width - 17, height);
-
         // level
         ctx.fillText('Floor ' + (g.levelCount + 1), width - 32, height + 27);
-
-        // ffwd and pause button
-        if (g.state === state.ACTIVE) {
-            this.drawSprite(ctx, 6, 6, width - 32, height + 16);
-            this.drawSprite(ctx, 5, 6, width - 16, height + 16);
-        }
     },
 
     /**
@@ -471,7 +478,7 @@ UI.prototype = {
             if (redraw) {
                 this.drawFog(scale);
             }
-            this.drawMenu(this.ctx[1]);
+            this.drawMenu(this.ctx[1], redraw);
         }
 
         if (g.state !== state.ACTIVE && redraw) {
@@ -484,7 +491,7 @@ UI.prototype = {
             }
             // draw menu in pause screen
             else if (g.state === state.PAUSED) {
-                this.drawMenu(this.ctx[1]);
+                this.drawMenu(this.ctx[1], true);
             }
         }
 
