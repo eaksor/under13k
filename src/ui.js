@@ -91,6 +91,12 @@ UI.prototype = {
      * @type {?{pos: {x: number, y: number}, time: number}}
      */
     upgradeAnim: null,
+    
+    /**
+     * Tracks tower selection changes.
+     * @type {number}
+     */
+    lastSelTower: 0,
 
     /**
      * Scale sprites to avoid blurring and non-square pixels.
@@ -364,8 +370,17 @@ UI.prototype = {
                 }
             }
             
-            // EVP listener
-            this.drawSprite(this.ctx[0], 4, 7, 0, height);
+            if (g.selTower) {
+                // tower buttons
+                o = g.objectAt(g.selTower.x, g.selTower.y);
+                for (i = 0; i < 3; i += 1) {
+                    this.drawSprite(this.ctx[0], i + 1, 1, i * 32, height);
+                }
+            }
+            else {
+                // EVP listener
+                this.drawSprite(this.ctx[0], 4, 7, 0, height);
+            }
             // money
             this.drawSprite(this.ctx[0], 6, 1, width - 42, height);
             // spawners
@@ -386,7 +401,6 @@ UI.prototype = {
             // tower buttons
             o = g.objectAt(g.selTower.x, g.selTower.y);
             for (i = 0; i < 3; i += 1) {
-                this.drawSprite(ctx, i + 1, 1, i * 32, height);
                 disabled = false;
                 switch (i) {
                 case 0: // sell
@@ -513,10 +527,14 @@ UI.prototype = {
             if (redraw) {
                 this.drawFog(scale);
             }
+            if (this.lastSelTower !== g.selTower) {
+                redraw = true;
+                this.lastSelTower = g.selTower;
+            }
             this.drawMenu(this.ctx[1], redraw);
         }
 
-        if (g.state !== state.ACTIVE && redraw) {
+        else if (redraw) {
             // draw background for info screens
             this.ctx[1].fillStyle = '#111';
             this.ctx[1].fillRect(0, 0, g.columns * 16, g.rows * 16);
@@ -526,7 +544,7 @@ UI.prototype = {
             }
             // draw menu in pause screen
             else if (g.state === state.PAUSED) {
-                this.drawMenu(this.ctx[1], true);
+                this.drawMenu(this.ctx[1], redraw);
             }
         }
 
