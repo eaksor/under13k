@@ -259,7 +259,7 @@ UI.prototype = {
      * @param {number} scale Scale factor.
      */
     drawEffects: function (scale) {
-        var ctx = this.ctx[1];
+        var ctx = this.ctx[1], gradient;
         this.resize(1, scale);
 
         // tile effects
@@ -291,10 +291,17 @@ UI.prototype = {
                 if (t && t.active()) {
                     switch (id) {
                     case 3: // light
-                        ctx.fillStyle = 'rgba(255,255,136,0.5)';
+                        gradient = ctx.createRadialGradient(x * 16 + 8, y * 16 + 8, 1, x * 16 + 8, y * 16 + 8, 32);
+                        gradient.addColorStop(0, 'rgba(255,255,136,0.6)');
+                        gradient.addColorStop(1, 'rgba(255,255,136,0)');
+                        ctx.fillStyle = gradient;
+                        nx = x * 16 + 8;
+                        ny = y * 16 + 8;
                         ctx.beginPath();
-                        ctx.moveTo(x * 16 + 8, y * 16 + 8);
-                        ctx.arc(x * 16 + 8, y * 16 + 8, 32, (t.a - t.range + tau) % tau, (t.a + t.range) % tau, 0);
+                        ctx.moveTo(nx, ny);
+                        ctx.arc(nx, ny, 4, t.a - t.range, t.a + t.range, 0);
+                        ctx.lineTo(nx + Math.cos(t.a + t.range) * 4, ny + Math.sin(t.a + t.range) * 4);
+                        ctx.arc(nx, ny, 32, t.a + t.range, t.a - t.range, 1);
                         ctx.fill();
                         break;
                     case 4: // lightning
