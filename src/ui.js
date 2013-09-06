@@ -98,25 +98,25 @@ UI.prototype = {
      * @return {number} Scale factor.
      */
     scaleSprites: function (scale) {
-            var x, y, i, data,
-                canvas = document.createElement('canvas'),
-                ctx = canvas.getContext('2d');
-            scale = Math.ceil(scale);
-            canvas.width = this.canvas.height = 128;
-            ctx.drawImage(this.otiles, 0, 0);
-            data = ctx.getImageData(0, 0, 128, 128).data;
-            canvas.width = canvas.height = 128 * scale;
-            for (x = 0; x < 128; x += 1) {
-                for (y = 0; y < 128; y += 1) {
-                    i = (y * 128 + x) * 4;
-                    if (data[i + 3]) {
-                        ctx.fillStyle = 'rgb(' + [data[i], data[i + 1], data[i + 2]] + ')';
-                        ctx.fillRect(x * scale, y * scale, scale, scale);
-                    }
+        var x, y, i, data,
+            canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+        scale = Math.ceil(scale);
+        canvas.width = this.canvas.height = 128;
+        ctx.drawImage(this.otiles, 0, 0);
+        data = ctx.getImageData(0, 0, 128, 128).data;
+        canvas.width = canvas.height = 128 * scale;
+        for (x = 0; x < 128; x += 1) {
+            for (y = 0; y < 128; y += 1) {
+                i = (y * 128 + x) * 4;
+                if (data[i + 3]) {
+                    ctx.fillStyle = 'rgb(' + [data[i], data[i + 1], data[i + 2]] + ')';
+                    ctx.fillRect(x * scale, y * scale, scale, scale);
                 }
             }
-            this.tiles = new Image();
-            this.tiles.src = canvas.toDataURL();
+        }
+        this.tiles = new Image();
+        this.tiles.src = canvas.toDataURL();
     },
     /**
      * Determines the scale factor best for the current resolution and settings.
@@ -431,7 +431,7 @@ UI.prototype = {
                 }
             }
         }
-        
+
         // outline
         ctx.fillStyle = 'rgba(255,255,255,0.2)';
         ctx.fillRect(0, height, width, 1);
@@ -439,7 +439,7 @@ UI.prototype = {
         ctx.fillStyle = 'rgba(0,0,0,0.2)';
         ctx.fillRect(0, height + 31, width, 1);
         ctx.fillRect(width - 1, height, 1, 32);
-        
+
         ctx.fillStyle = '#222';
         ctx.textAlign = 'right';
         // money
