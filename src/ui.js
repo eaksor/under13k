@@ -291,10 +291,7 @@ UI.prototype = {
                 if (t && t.active()) {
                     switch (id) {
                     case 3: // light
-                        gradient = ctx.createRadialGradient(x * 16 + 8, y * 16 + 8, 1, x * 16 + 8, y * 16 + 8, 32);
-                        gradient.addColorStop(0, 'rgba(255,255,136,0.6)');
-                        gradient.addColorStop(1, 'rgba(255,255,136,0)');
-                        ctx.fillStyle = gradient;
+                        ctx.fillStyle = 'rgba(255,255,136,0.5)';
                         nx = x * 16 + 8;
                         ny = y * 16 + 8;
                         ctx.beginPath();
