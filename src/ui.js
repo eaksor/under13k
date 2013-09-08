@@ -259,7 +259,7 @@ UI.prototype = {
      * @param {number} scale Scale factor.
      */
     drawEffects: function (scale) {
-        var ctx = this.ctx[1], gradient;
+        var ctx = this.ctx[1];
         this.resize(1, scale);
 
         // tile effects
