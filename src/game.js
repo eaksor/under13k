@@ -201,7 +201,7 @@ Game.prototype = {
             });
         }
         // draw state
-        this.ui.update();
+        this.ui.update(this.redraw);
         // reset redraw state
         if (this.state === state.ACTIVE) {
             this.redraw = false;

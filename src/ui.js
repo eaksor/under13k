@@ -104,25 +104,40 @@ UI.prototype = {
      * @return {number} Scale factor.
      */
     scaleSprites: function (scale) {
-        var x, y, i, data,
+        var x, y, i, data, sx, sy,
             canvas = document.createElement('canvas'),
-            ctx = canvas.getContext('2d');
+            ctx = canvas.getContext('2d'),
+            self = this,
+            loaded = 0,
+            loadedCB = function () {
+                loaded += 1;
+                if (loaded === 64) {
+                    self.update(true);
+                }
+            };
         scale = Math.ceil(scale);
-        canvas.width = this.canvas.height = 128;
+        canvas.width = canvas.height = 128;
         ctx.drawImage(this.otiles, 0, 0);
         data = ctx.getImageData(0, 0, 128, 128).data;
-        canvas.width = canvas.height = 128 * scale;
-        for (x = 0; x < 128; x += 1) {
-            for (y = 0; y < 128; y += 1) {
-                i = (y * 128 + x) * 4;
-                if (data[i + 3]) {
-                    ctx.fillStyle = 'rgb(' + [data[i], data[i + 1], data[i + 2]] + ')';
-                    ctx.fillRect(x * scale, y * scale, scale, scale);
+        this.tiles = [];
+        for (sx = 0; sx < 8; sx += 1) {
+            this.tiles[sx] = [];
+            for (sy = 0; sy < 8; sy += 1) {
+                canvas.width = canvas.height = 17 * scale;
+                this.tiles[sx][sy] = new Image();
+                for (x = 0; x < 17; x += 1) {
+                    for (y = 0; y < 17; y += 1) {
+                        i = ((sy * 16 + y % 16) * 128 + sx * 16 + x % 16) * 4;
+                        if (data[i + 3]) {
+                            ctx.fillStyle = 'rgb(' + [data[i], data[i + 1], data[i + 2]] + ')';
+                            ctx.fillRect(x * scale, y * scale, scale, scale);
+                        }
+                    }
                 }
+                this.tiles[sx][sy].onload = loadedCB;
+                this.tiles[sx][sy].src = canvas.toDataURL();
             }
         }
-        this.tiles = new Image();
-        this.tiles.src = canvas.toDataURL();
     },
     /**
      * Determines the scale factor best for the current resolution and settings.
@@ -198,30 +213,34 @@ UI.prototype = {
      * @param scale {number} scale Scale factor.
      */
     drawTitle: function(ctx, scale) {
-        var x, y;
+        var x, y, tile;
         this.resize(2, scale);
 
         // draw ground
         for(y = 0; y < 5; y += 1) {
             for (x = 0; x < 9; x += 1) {
-                if (y > 1 || x !== 4) {
-                    this.drawSprite(ctx, 1, 0, x * 16, 128 + y * 16);
-                }
+                this.drawSprite(ctx, 1, 0, x * 16, 128 + y * 16);
             }
         }
-        // add gradient for door
-        this.drawGradient(ctx, 64, 160, 16, 16);
         // add gradient for background
         this.drawGradient(ctx, 0, 128, 176, 48);
 
         // draw crypt
+        tile = this.tiles[3][0];
         for(y = 0; y < 4; y += 1) {
             for (x = 0; x < 7; x += 1) {
-                if (y < 2 || x !== 3) {
-                    this.drawSprite(ctx, 3, 0, 16 + x * 16, 112 + y * 16);
+                if (x !== 3 || y < 2) {
+                    ctx.drawImage(tile, (x + 1) * 16, (y + 7) * 16,
+                                  x === 6 || (x === 2 && y > 1) ? 16 : 17,
+                                  x === 3 && y === 1 ? 16 : 17);
                 }
             }
         }
+        // add gradient and shadow for door
+        ctx.fillStyle = '#111';
+        ctx.fillRect(64,144,16,16);
+        this.drawGradient(ctx, 64, 160, 16, 16);
+        
         // add outline
         ctx.fillStyle = 'rgba(255,255,255,0.2)';
         ctx.fillRect(16, 128, 112, 1);
@@ -471,13 +490,12 @@ UI.prototype = {
     /**
      * Updates used screen size and draws current game state (including complete redraw if necessary).
      */
-    update: function () {
-        var scale = this.getScale(), i, div, full,
-            redraw = g.redraw;
+    update: function (redraw) {
+        var scale = this.getScale(), i, div, full;
         if (this.scale !== scale) {
-            redraw = true;
             this.scale = scale;
             this.scaleSprites(scale);
+            return;
         }
         if (redraw) {
             // set current size and offsets
@@ -608,8 +626,7 @@ UI.prototype = {
      * @param {number} y y coordinate in pixels.
      */
     drawSprite: function(ctx, sx, sy, x, y) {
-        var scale = Math.ceil(this.scale);
-        ctx.drawImage(this.tiles, sx * 16 * scale, sy * 16 * scale, 16 * scale, 16 * scale, x, y, 16, 16);
+        ctx.drawImage(this.tiles[sx][sy], x, y, 17, 17);
     },
 
     /**
@@ -623,7 +640,7 @@ UI.prototype = {
     drawTile: function (ctx, x, y, id) {
         var o, offset;
         // put dirt under everything on the board
-        if (g.valid(x, y) && id !== 0) {
+        if (g.valid(x, y) && (id < 0 || id > 2)) {
             this.drawSprite(ctx, 1, 0, x * 16, y * 16);
         }
         // draw base sprite
